@@ -12,7 +12,7 @@ Here is the specification of the format:
       - notes: a set of notes to play at once on the guitare
         - fret: on which fret is the note
         - string: on which string is the note
-        - tie: if true then the note is note tied to the next note
+        - tie: if true then the note is note tied to the previous note
         - hp: if true then the note is
           - a hammer-on if the next one has higher fret value
           - a pull-off if the next one has lower fret value

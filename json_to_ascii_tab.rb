@@ -212,35 +212,94 @@ class TabRenderer
       end
     end
 
-    lines = Array.new(6) { +"" }
-
-    beat_spans = [] # {start:, stop:, beat:}
+    # Build mutable char arrays so we can "paint" sustains for ties
+    line_chars = Array.new(6) { [] } # each is an array of characters
+    beat_spans = []                  # {start:, stop:, beat:}
     cur_col = 0
+
+    # For tie-to-previous, track last played note "end column" per string.
+    last_note_end = Array.new(6, nil) # nil means no previous note on that string
 
     clipped.each_with_index do |beat, bi|
       duration_r = Util.rational_from_fraction(beat['duration'])
       cols = [Util.duration_to_cols(duration_r), 1].max
 
       next_beat = clipped[bi + 1]
-      tokens = tokens_for_beat(beat, next_beat)
+      infos = tokens_for_beat_with_notes(beat, next_beat)
+
+      tokens = infos.map { |h| h[:token] }
       token_width = tokens.map(&:length).max
       event_cols = [cols, token_width].max
 
+      # Extend all string arrays with '-' for the full event width.
+      target_len = cur_col + event_cols
+      6.times do |si|
+        while line_chars[si].length < target_len
+          line_chars[si] << '-'
+        end
+      end
+
+      # Paint tokens and ties at cur_col
+      6.times do |si|
+        note = infos[si][:note]
+        tok  = infos[si][:token]
+
+        next if tok == '-' # no note on this string
+
+        # If this note is tied to previous note on same string, draw sustain from previous end to current start.
+        if note && note['tie'] && last_note_end[si].is_a?(Integer)
+          from = last_note_end[si]
+          to = cur_col
+          if from < to
+            (from...to).each do |pos|
+              # Only overwrite existing '-' (don't destroy other symbols if present)
+              line_chars[si][pos] = '=' if line_chars[si][pos] == '-'
+            end
+          end
+        end
+
+        # Place the token itself (overwrite dashes)
+        tok_chars = tok.chars
+        tok_chars.each_with_index do |ch, k|
+          pos = cur_col + k
+          break if pos >= target_len
+          line_chars[si][pos] = ch
+        end
+
+        # Update last_note_end for future ties (end right after token)
+        last_note_end[si] = cur_col + tok.length
+      end
+
       beat_spans << { start: cur_col, stop: cur_col + event_cols, beat: beat }
       cur_col += event_cols
-
-      6.times do |si|
-        tok = tokens[si]
-        lines[si] << tok
-        lines[si] << ('-' * (event_cols - tok.length))
-      end
     end
+
+    lines = line_chars.map(&:join)
 
     tuplet_annot = build_tuplet_annotation(beat_spans, cur_col)
     pm_annot     = build_pm_annotation(beat_spans, cur_col)
     lr_annot     = build_let_ring_annotation(beat_spans, cur_col)
 
     [lines, { tuplet: tuplet_annot, pm: pm_annot, lr: lr_annot }]
+  end
+
+  # Returns array of 6 entries: { token:, note: } where note may be nil if no note on that string.
+  def tokens_for_beat_with_notes(beat, next_beat)
+    return Array.new(6) { { token: '-', note: nil } } if beat['rest']
+
+    notes = (beat['notes'] || [])
+    return Array.new(6) { { token: '-', note: nil } } if notes.empty? || notes.all? { |n| n['rest'] }
+
+    infos = Array.new(6) { { token: '-', note: nil } }
+
+    notes.each do |n|
+      next if n['rest']
+      si = n['string']
+      next if si.nil? || si < 0 || si > 5
+      infos[si] = { token: note_token(n, next_beat), note: n }
+    end
+
+    infos
   end
 
   # Classic "rail" style: ----3----
@@ -349,7 +408,6 @@ class TabRenderer
 
     first = line.index('~') || 0
     text = 'let ring'
-    # Try to place it starting at the first span; if it doesn't fit, shift left to fit.
     start_pos = [first, total_cols - text.length].min
     start_pos = 0 if start_pos < 0
 
@@ -362,25 +420,10 @@ class TabRenderer
     line.join
   end
 
-  def tokens_for_beat(beat, next_beat)
-    return Array.new(6, '-') if beat['rest']
-    notes = (beat['notes'] || [])
-    return Array.new(6, '-') if notes.empty? || notes.all? { |n| n['rest'] }
-
-    tokens = Array.new(6, '-')
-    notes.each do |n|
-      next if n['rest']
-      si = n['string']
-      next if si.nil? || si < 0 || si > 5
-      tokens[si] = note_token(n, next_beat)
-    end
-    tokens
-  end
-
   def note_token(note, next_beat)
+    # NOTE: tie is handled in render_measure (tie means tied to PREVIOUS note)
     base = note['dead'] ? 'x' : note.fetch('fret', 0).to_s
     base = "(#{base})" if note['ghost']
-    base += '~' if note['tie']
     base += '/' if note.dig('slide') == 'shift'
     base
   end
@@ -444,7 +487,7 @@ end
 options = { per_line: 8 }
 
 OptionParser.new do |opts|
-  opts.banner = "Usage: tab_decode.rb --json FILE [--per-line N]"
+  opts.banner = "Usage: json_to_ascii_tab.rb --json FILE [--per-line N]"
   opts.on('--json FILE', 'Input JSON file') { |v| options[:json] = v }
   opts.on('--per-line N', Integer, 'Rendered measures per output line (default 8)') { |v| options[:per_line] = v }
 end.parse!

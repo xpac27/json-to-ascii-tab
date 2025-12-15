@@ -70,7 +70,7 @@ It is designed for **machine-generated tabs** (e.g. Songsterr-like exports) and 
 ## Usage
 
 ```bash
-ruby tab_decode.rb --json input.json
+ruby json_to_ascii_tab.rb --json input.json
 ```
 
 Optional parameters:
