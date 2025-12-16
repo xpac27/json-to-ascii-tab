@@ -82,7 +82,15 @@ class TabRenderer
 
   def render
     out = []
-    out << @header_text if @header_text
+
+    if @header_text
+      inner = " #{@header_text} "
+      border = "+#{'-' * inner.length}+"
+      out << border
+      out << "|#{inner}|"
+      out << border
+      out << ""
+    end
 
     blocks = detect_repeats(@measures, max_len: 16)
     units = build_units(@measures, blocks)
@@ -518,13 +526,13 @@ name = json['name'].to_s.strip
 part_label = part_id.nil? ? nil : "(part #{part_id})"
 
 header_bits = []
+header_bits << name unless name.empty?
 unless instrument.empty? && part_label.nil?
   inst = instrument.empty? ? nil : instrument
   inst = [inst, part_label].compact.join(' ')
   header_bits << inst unless inst.empty?
 end
-header_bits << name unless name.empty?
-header_text = header_bits.empty? ? nil : "# #{header_bits.join(' - ')}"
+header_text = header_bits.empty? ? nil : "#{header_bits.join(' - ')}"
 
 tempo_markers_by_measure = Hash.new { |h, k| h[k] = [] }
 json.dig('automations', 'tempo').to_a.each do |entry|

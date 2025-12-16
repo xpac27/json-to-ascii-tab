@@ -93,10 +93,12 @@ Notes:
 
 ## Metadata Header
 
-If `instrument`, `partId`, or `name` are present, a header line is printed above the tab:
+If `instrument`, `partId`, or `name` are present, a header line is printed in a boxed banner above the tab, followed by a blank line:
 
 ```
-# Overdriven Guitar (part 0) - Example Track
++--------------------------------------------+
+| Example Track - Overdriven Guitar (part 0) |
++--------------------------------------------+
 ```
 
 Fields are optional; missing values are skipped.
