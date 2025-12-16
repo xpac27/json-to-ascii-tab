@@ -1,0 +1,106 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "GuitarTab",
+  "type": "object",
+  "required": ["measures"],
+  "properties": {
+    "tuning": {
+      "type": "array",
+      "description": "6 MIDI note numbers, string 1 -> 6 (high -> low)",
+      "items": { "type": "integer" },
+      "minItems": 6,
+      "maxItems": 6
+    },
+    "measures": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/measure" }
+    }
+  },
+  "$defs": {
+    "measure": {
+      "type": "object",
+      "required": ["voices"],
+      "properties": {
+        "signature": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": { "type": "integer" }
+        },
+        "marker": {
+          "type": "object",
+          "properties": {
+            "text": { "type": "string" },
+            "width": { "type": "number" }
+          },
+          "additionalProperties": true
+        },
+        "voices": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/voice" }
+        }
+      },
+      "additionalProperties": true
+    },
+    "voice": {
+      "type": "object",
+      "properties": {
+        "rest": { "type": "boolean" },
+        "beats": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/beat" }
+        }
+      },
+      "additionalProperties": true
+    },
+    "beat": {
+      "type": "object",
+      "required": ["duration"],
+      "properties": {
+        "notes": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/note" }
+        },
+        "duration": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": { "type": "integer" }
+        },
+        "type": { "type": "integer" },
+        "dots": { "type": "integer" },
+        "rest": { "type": "boolean" },
+
+        "tuplet": { "type": "integer" },
+        "tupletStart": { "type": "boolean" },
+        "tupletStop": { "type": "boolean" },
+
+        "beamStart": { "type": "boolean" },
+        "beamStop": { "type": "boolean" },
+
+        "palmMute": { "type": "boolean" },
+        "letRing": { "type": "boolean" }
+      },
+      "additionalProperties": true
+    },
+    "note": {
+      "type": "object",
+      "properties": {
+        "string": { "type": "integer", "minimum": 0, "maximum": 5 },
+        "fret": { "type": "integer", "minimum": 0 },
+        "rest": { "type": "boolean" },
+
+        "tie": {
+          "type": "boolean",
+          "description": "Tie to PREVIOUS note (render sustain gap with '=')"
+        },
+        "hp": { "type": "boolean" },
+        "slide": { "type": "string" },
+
+        "ghost": { "type": "boolean" },
+        "dead": { "type": "boolean" }
+      },
+      "additionalProperties": true
+    }
+  }
+}
