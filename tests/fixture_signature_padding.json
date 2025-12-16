@@ -1,0 +1,18 @@
+{
+  "tuning": [64, 59, 55, 50, 45, 40],
+  "measures": [
+    {
+      "signature": [4, 4],
+      "marker": { "text": "Padding test: measure is short, must be padded" },
+      "voices": [
+        {
+          "beats": [
+            { "duration": [1, 4], "notes": [{ "string": 5, "fret": 0 }] },
+            { "duration": [1, 4], "notes": [{ "string": 5, "fret": 1 }] },
+            { "duration": [1, 4], "notes": [{ "string": 5, "fret": 2 }] }
+          ]
+        }
+      ]
+    }
+  ]
+}
