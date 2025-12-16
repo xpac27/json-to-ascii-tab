@@ -24,6 +24,7 @@ It is designed for **machine-generated tabs** (e.g. Songsterr-like exports) and 
 * Enforces **exact time-signature fill** per measure
   (pads with rests if a measure is short)
 * Measures are numbered above the tab
+* **Tempo changes** at measure starts render as labels above the tab
 * Wraps output after *N rendered measures per line* (default: 8)
 
 ### 🔁 Repeat compression
@@ -100,12 +101,33 @@ Options:
 
 ```json
 {
+  "automations": { "tempo": [ ... ] },
   "tuning": [59, 54, 50, 45, 40, 35],
   "measures": [ ... ]
 }
 ```
 
 * `tuning` is optional. If missing or invalid, standard tuning is used.
+* `automations.tempo` (optional) holds tempo changes at **measure starts** (see below).
+
+---
+
+## Tempo Automation
+
+Tempo changes can be supplied via `automations.tempo`. Each entry applies at the **start of a measure** and renders a label (left-aligned inside the measure box) above the tab, e.g. `Tempo 120`.
+
+```json
+"automations": {
+  "tempo": [
+    { "measure": 0, "position": 0, "bpm": 120, "type": 4 }
+  ]
+}
+```
+
+* `measure`: zero-based index where the change starts
+* `position`: only `0` (measure start) is rendered; other positions are ignored
+* `bpm`: tempo value that will be displayed
+* Other fields (e.g. `type`, `linear`) are ignored for rendering
 
 ---
 

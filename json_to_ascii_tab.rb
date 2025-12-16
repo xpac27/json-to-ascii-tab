@@ -11,7 +11,7 @@ COLUMNS_PER_SIXTEENTH = 3
 SEPARATOR_WIDTH = 2
 
 MeasureRep = Struct.new(
-  :measure_index, :signature, :beats, :marker_text, :raw, :canon,
+  :measure_index, :signature, :beats, :marker_text, :tempo_markers, :raw, :canon,
   keyword_init: true
 )
 
@@ -104,6 +104,9 @@ class TabRenderer
       lines = Array.new(6) { +"" }
       num_line = +""
 
+      tempo_line = +""
+      any_tempo = false
+
       tuplet_line = +""
       pm_line = +""
       lr_line = +""
@@ -136,9 +139,13 @@ class TabRenderer
         measure_box_width = SEPARATOR_WIDTH + width + SEPARATOR_WIDTH
         num_line << Util.center_text((m.measure_index + 1).to_s, measure_box_width)
 
+        tempo_text = (m.tempo_markers || []).map { |t| "Tempo #{t[:bpm]}" }.uniq.join(', ')
+        any_tempo ||= !tempo_text.empty?
+
         tuplet_line << sep_left.ljust(SEPARATOR_WIDTH) << tuplet_annot << sep_right.ljust(SEPARATOR_WIDTH)
         pm_line     << sep_left.ljust(SEPARATOR_WIDTH) << pm_annot     << sep_right.ljust(SEPARATOR_WIDTH)
         lr_line     << sep_left.ljust(SEPARATOR_WIDTH) << lr_annot     << sep_right.ljust(SEPARATOR_WIDTH)
+        tempo_line  << Util.center_text(tempo_text, measure_box_width)
 
         6.times do |si|
           lines[si] << sep_left.ljust(SEPARATOR_WIDTH)
@@ -153,11 +160,13 @@ class TabRenderer
           tuplet_line << (' ' * pad)
           pm_line << (' ' * pad)
           lr_line << (' ' * pad)
+          tempo_line << (' ' * pad)
           lines.map! { |ln| ln + (' ' * pad) }
         end
       end
 
       prefix_width = @string_names.map(&:length).max
+      out << tempo_line if any_tempo
       out << num_line
       out << (" " * prefix_width + tuplet_line) if any_tuplets
       out << (" " * prefix_width + pm_line)     if any_pm
@@ -500,6 +509,18 @@ tuning = json['tuning']
 tuning = DEFAULT_TUNING_MIDI if !tuning.is_a?(Array) || tuning.length != 6
 string_names = tuning.map { |m| Util.midi_to_note_name(m, with_octave: false) }
 
+tempo_markers_by_measure = Hash.new { |h, k| h[k] = [] }
+json.dig('automations', 'tempo').to_a.each do |entry|
+  next unless entry.is_a?(Hash)
+  measure_idx = entry['measure']
+  bpm = entry['bpm']
+  position = entry['position']
+  next unless measure_idx.is_a?(Integer) && !bpm.nil?
+  next unless position.nil? || position.to_i == 0 # only support tempo changes at measure start for now
+
+  tempo_markers_by_measure[measure_idx] << { bpm: bpm.to_i }
+end
+
 raw_measures = json.fetch('measures')
 current_sig = DEFAULT_SIGNATURE
 
@@ -544,6 +565,7 @@ measures = raw_measures.map.with_index do |m, idx|
     signature: current_sig,
     beats: beats,
     marker_text: m.dig('marker', 'text'),
+    tempo_markers: tempo_markers_by_measure[idx],
     raw: m,
     canon: Util.deep_sort(canon_obj)
   )
