@@ -22,6 +22,10 @@ Render structured JSON guitar tabs to ASCII with repeats, tuplets, palm mute / l
   - `doc/format.json.schema` (schema alignment)
 - Don't commit, let the user review and commit.
 
+## Committing Changes
+- Commit only after user review.
+- If commit fails due to gpg, ask the user to warmup gpg using the `gpg-warmup` command.
+
 ## Key Semantics
 - `tie: true` ties **to previous note** on the same string; sustain gap rendered with `=`.
 - Tempo automation: only `automations.tempo` entries at measure start (`position` 0/`nil`) render a left-aligned `Tempo <bpm>` label.
