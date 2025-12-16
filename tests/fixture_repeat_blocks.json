@@ -1,0 +1,245 @@
+{
+  "tuning": [64, 59, 55, 50, 45, 40],
+  "measures": [
+    {
+      "signature": [4, 4],
+      "marker": { "text": "Repeat test: 16 empty measures x4, then 4-measure phrase x4" },
+      "voices": [{ "rest": true, "beats": [] }]
+    },
+
+    { "voices": [{ "rest": true, "beats": [] }] },
+    { "voices": [{ "rest": true, "beats": [] }] },
+    { "voices": [{ "rest": true, "beats": [] }] },
+    { "voices": [{ "rest": true, "beats": [] }] },
+    { "voices": [{ "rest": true, "beats": [] }] },
+    { "voices": [{ "rest": true, "beats": [] }] },
+    { "voices": [{ "rest": true, "beats": [] }] },
+    { "voices": [{ "rest": true, "beats": [] }] },
+    { "voices": [{ "rest": true, "beats": [] }] },
+    { "voices": [{ "rest": true, "beats": [] }] },
+    { "voices": [{ "rest": true, "beats": [] }] },
+    { "voices": [{ "rest": true, "beats": [] }] },
+    { "voices": [{ "rest": true, "beats": [] }] },
+    { "voices": [{ "rest": true, "beats": [] }] },
+    { "voices": [{ "rest": true, "beats": [] }] },
+
+    { "voices": [{ "rest": true, "beats": [] }] },
+    { "voices": [{ "rest": true, "beats": [] }] },
+    { "voices": [{ "rest": true, "beats": [] }] },
+    { "voices": [{ "rest": true, "beats": [] }] },
+    { "voices": [{ "rest": true, "beats": [] }] },
+    { "voices": [{ "rest": true, "beats": [] }] },
+    { "voices": [{ "rest": true, "beats": [] }] },
+    { "voices": [{ "rest": true, "beats": [] }] },
+    { "voices": [{ "rest": true, "beats": [] }] },
+    { "voices": [{ "rest": true, "beats": [] }] },
+    { "voices": [{ "rest": true, "beats": [] }] },
+    { "voices": [{ "rest": true, "beats": [] }] },
+    { "voices": [{ "rest": true, "beats": [] }] },
+    { "voices": [{ "rest": true, "beats": [] }] },
+    { "voices": [{ "rest": true, "beats": [] }] },
+    { "voices": [{ "rest": true, "beats": [] }] },
+
+    { "voices": [{ "rest": true, "beats": [] }] },
+    { "voices": [{ "rest": true, "beats": [] }] },
+    { "voices": [{ "rest": true, "beats": [] }] },
+    { "voices": [{ "rest": true, "beats": [] }] },
+    { "voices": [{ "rest": true, "beats": [] }] },
+    { "voices": [{ "rest": true, "beats": [] }] },
+    { "voices": [{ "rest": true, "beats": [] }] },
+    { "voices": [{ "rest": true, "beats": [] }] },
+    { "voices": [{ "rest": true, "beats": [] }] },
+    { "voices": [{ "rest": true, "beats": [] }] },
+    { "voices": [{ "rest": true, "beats": [] }] },
+    { "voices": [{ "rest": true, "beats": [] }] },
+    { "voices": [{ "rest": true, "beats": [] }] },
+    { "voices": [{ "rest": true, "beats": [] }] },
+    { "voices": [{ "rest": true, "beats": [] }] },
+    { "voices": [{ "rest": true, "beats": [] }] },
+
+    {
+      "marker": { "text": "Phrase A (4 measures) should repeat x4 without a lonely first measure" },
+      "voices": [
+        {
+          "beats": [
+            { "duration": [1, 4], "notes": [{ "string": 4, "fret": 3 }] },
+            { "duration": [1, 4], "notes": [{ "string": 4, "fret": 5 }] },
+            { "duration": [1, 4], "notes": [{ "string": 4, "fret": 7 }] },
+            { "duration": [1, 4], "notes": [{ "string": 4, "fret": 8 }] }
+          ]
+        }
+      ]
+    },
+    {
+      "voices": [
+        {
+          "beats": [
+            { "duration": [1, 2], "notes": [{ "string": 3, "fret": 2 }] },
+            { "duration": [1, 2], "notes": [{ "string": 3, "fret": 2, "tie": true }] }
+          ]
+        }
+      ]
+    },
+    {
+      "voices": [
+        {
+          "beats": [
+            { "duration": [1, 4], "palmMute": true, "notes": [{ "string": 5, "fret": 0 }] },
+            { "duration": [1, 4], "palmMute": true, "notes": [{ "string": 5, "fret": 0, "tie": true }] },
+            { "duration": [1, 4], "palmMute": true, "notes": [{ "string": 5, "fret": 0, "tie": true }] },
+            { "duration": [1, 4], "palmMute": true, "notes": [{ "string": 5, "fret": 0, "tie": true }] }
+          ]
+        }
+      ]
+    },
+    {
+      "voices": [
+        {
+          "beats": [
+            { "duration": [1, 4], "letRing": true, "notes": [{ "string": 1, "fret": 5 }] },
+            { "duration": [1, 4], "letRing": true, "notes": [{ "string": 0, "fret": 5 }] },
+            { "duration": [1, 2], "rest": true, "notes": [{ "rest": true }] }
+          ]
+        }
+      ]
+    },
+
+    {
+      "voices": [
+        {
+          "beats": [
+            { "duration": [1, 4], "notes": [{ "string": 4, "fret": 3 }] },
+            { "duration": [1, 4], "notes": [{ "string": 4, "fret": 5 }] },
+            { "duration": [1, 4], "notes": [{ "string": 4, "fret": 7 }] },
+            { "duration": [1, 4], "notes": [{ "string": 4, "fret": 8 }] }
+          ]
+        }
+      ]
+    },
+    {
+      "voices": [
+        {
+          "beats": [
+            { "duration": [1, 2], "notes": [{ "string": 3, "fret": 2 }] },
+            { "duration": [1, 2], "notes": [{ "string": 3, "fret": 2, "tie": true }] }
+          ]
+        }
+      ]
+    },
+    {
+      "voices": [
+        {
+          "beats": [
+            { "duration": [1, 4], "palmMute": true, "notes": [{ "string": 5, "fret": 0 }] },
+            { "duration": [1, 4], "palmMute": true, "notes": [{ "string": 5, "fret": 0, "tie": true }] },
+            { "duration": [1, 4], "palmMute": true, "notes": [{ "string": 5, "fret": 0, "tie": true }] },
+            { "duration": [1, 4], "palmMute": true, "notes": [{ "string": 5, "fret": 0, "tie": true }] }
+          ]
+        }
+      ]
+    },
+    {
+      "voices": [
+        {
+          "beats": [
+            { "duration": [1, 4], "letRing": true, "notes": [{ "string": 1, "fret": 5 }] },
+            { "duration": [1, 4], "letRing": true, "notes": [{ "string": 0, "fret": 5 }] },
+            { "duration": [1, 2], "rest": true, "notes": [{ "rest": true }] }
+          ]
+        }
+      ]
+    },
+
+    {
+      "voices": [
+        {
+          "beats": [
+            { "duration": [1, 4], "notes": [{ "string": 4, "fret": 3 }] },
+            { "duration": [1, 4], "notes": [{ "string": 4, "fret": 5 }] },
+            { "duration": [1, 4], "notes": [{ "string": 4, "fret": 7 }] },
+            { "duration": [1, 4], "notes": [{ "string": 4, "fret": 8 }] }
+          ]
+        }
+      ]
+    },
+    {
+      "voices": [
+        {
+          "beats": [
+            { "duration": [1, 2], "notes": [{ "string": 3, "fret": 2 }] },
+            { "duration": [1, 2], "notes": [{ "string": 3, "fret": 2, "tie": true }] }
+          ]
+        }
+      ]
+    },
+    {
+      "voices": [
+        {
+          "beats": [
+            { "duration": [1, 4], "palmMute": true, "notes": [{ "string": 5, "fret": 0 }] },
+            { "duration": [1, 4], "palmMute": true, "notes": [{ "string": 5, "fret": 0, "tie": true }] },
+            { "duration": [1, 4], "palmMute": true, "notes": [{ "string": 5, "fret": 0, "tie": true }] },
+            { "duration": [1, 4], "palmMute": true, "notes": [{ "string": 5, "fret": 0, "tie": true }] }
+          ]
+        }
+      ]
+    },
+    {
+      "voices": [
+        {
+          "beats": [
+            { "duration": [1, 4], "letRing": true, "notes": [{ "string": 1, "fret": 5 }] },
+            { "duration": [1, 4], "letRing": true, "notes": [{ "string": 0, "fret": 5 }] },
+            { "duration": [1, 2], "rest": true, "notes": [{ "rest": true }] }
+          ]
+        }
+      ]
+    },
+
+    {
+      "voices": [
+        {
+          "beats": [
+            { "duration": [1, 4], "notes": [{ "string": 4, "fret": 3 }] },
+            { "duration": [1, 4], "notes": [{ "string": 4, "fret": 5 }] },
+            { "duration": [1, 4], "notes": [{ "string": 4, "fret": 7 }] },
+            { "duration": [1, 4], "notes": [{ "string": 4, "fret": 8 }] }
+          ]
+        }
+      ]
+    },
+    {
+      "voices": [
+        {
+          "beats": [
+            { "duration": [1, 2], "notes": [{ "string": 3, "fret": 2 }] },
+            { "duration": [1, 2], "notes": [{ "string": 3, "fret": 2, "tie": true }] }
+          ]
+        }
+      ]
+    },
+    {
+      "voices": [
+        {
+          "beats": [
+            { "duration": [1, 4], "palmMute": true, "notes": [{ "string": 5, "fret": 0 }] },
+            { "duration": [1, 4], "palmMute": true, "notes": [{ "string": 5, "fret": 0, "tie": true }] },
+            { "duration": [1, 4], "palmMute": true, "notes": [{ "string": 5, "fret": 0, "tie": true }] },
+            { "duration": [1, 4], "palmMute": true, "notes": [{ "string": 5, "fret": 0, "tie": true }] }
+          ]
+        }
+      ]
+    },
+    {
+      "voices": [
+        {
+          "beats": [
+            { "duration": [1, 4], "letRing": true, "notes": [{ "string": 1, "fret": 5 }] },
+            { "duration": [1, 4], "letRing": true, "notes": [{ "string": 0, "fret": 5 }] },
+            { "duration": [1, 2], "rest": true, "notes": [{ "rest": true }] }
+          ]
+        }
+      ]
+    }
+  ]
+}
