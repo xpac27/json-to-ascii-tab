@@ -12,8 +12,12 @@ class TempoLabelAlignmentTest < Minitest::Test
 
     assert status.success?, "renderer failed: #{stderr}"
 
-    expected = <<~'OUT'.split("\n")
-# Overdriven Guitar (part 0) - Example Track
+    header = 'Example Track - Overdriven Guitar (part 0)'
+    inner = " #{header} "
+    border = "+#{'-' * inner.length}+"
+    header_box = [border, "|#{inner}|", border, ""]
+
+    body = <<~'OUT'.split("\n")
 # Demo: tuplets, PM, let ring, tie
                      Tempo 120
                          1                                                   2
@@ -29,6 +33,7 @@ E| 0-----------------------------------x-----------| | 0===========0===========0
 OUT
 
     lines = stdout.lines.map { |l| l.chomp.rstrip }
+    expected = header_box + body
     assert_equal expected, lines.first(expected.length)
   end
 end
