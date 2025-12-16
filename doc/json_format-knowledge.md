@@ -15,6 +15,7 @@ The format is optimized for:
 
 ```json
 {
+  "automations": { "tempo": [ ... ] },
   "tuning": [59, 54, 50, 45, 40, 35],
   "measures": [ ... ]
 }
@@ -22,10 +23,11 @@ The format is optimized for:
 
 ### Fields
 
-| Field      | Type           | Required | Description                                    |
-| ---------- | -------------- | -------- | ---------------------------------------------- |
-| `tuning`   | array[int]     | optional | Guitar tuning expressed as 6 MIDI note numbers |
-| `measures` | array[measure] | required | Ordered list of measures                       |
+| Field        | Type           | Required | Description                                    |
+| ------------ | -------------- | -------- | ---------------------------------------------- |
+| `automations`| object         | optional | Automation lanes (tempo supported)             |
+| `tuning`     | array[int]     | optional | Guitar tuning expressed as 6 MIDI note numbers |
+| `measures`   | array[measure] | required | Ordered list of measures                       |
 
 ---
 
@@ -51,6 +53,35 @@ Example interpretation:
 |   35 | B1   |
 
 If `tuning` is missing or invalid, **standard tuning** is assumed.
+
+---
+
+## Tempo Automation
+
+Tempo changes are provided via `automations.tempo`. Each entry applies at the **start of a measure** and renders a left-aligned label inside that measure’s box above the tab (e.g. `Tempo 120`).
+
+```json
+"automations": {
+  "tempo": [
+    { "measure": 0, "position": 0, "bpm": 120, "type": 4 }
+  ]
+}
+```
+
+### Tempo fields
+
+| Field     | Type    | Required | Description                               |
+| --------- | ------- | -------- | ----------------------------------------- |
+| `measure` | int     | yes      | Zero-based measure index of the change    |
+| `position`| int     | optional | Only `0` (measure start) is rendered      |
+| `bpm`     | number  | yes      | Tempo value displayed in the label        |
+| `type`    | int     | optional | Ignored for rendering                     |
+| `linear`  | boolean | optional | Ignored for rendering                     |
+
+Notes:
+* Entries with `position` other than `0` are ignored by the renderer.
+* Multiple tempo changes in one measure are deduped by their BPM for display.
+* Other automation lanes are currently ignored.
 
 ---
 

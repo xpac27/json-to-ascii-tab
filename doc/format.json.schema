@@ -4,6 +4,16 @@
   "type": "object",
   "required": ["measures"],
   "properties": {
+    "automations": {
+      "type": "object",
+      "properties": {
+        "tempo": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/tempoAutomation" }
+        }
+      },
+      "additionalProperties": true
+    },
     "tuning": {
       "type": "array",
       "description": "6 MIDI note numbers, string 1 -> 6 (high -> low)",
@@ -100,6 +110,18 @@
         "ghost": { "type": "boolean" },
         "dead": { "type": "boolean" }
       },
+      "additionalProperties": true
+    },
+    "tempoAutomation": {
+      "type": "object",
+      "properties": {
+        "measure": { "type": "integer", "minimum": 0 },
+        "position": { "type": "integer", "minimum": 0, "description": "Only 0 (measure start) is rendered" },
+        "bpm": { "type": "number" },
+        "type": { "type": "integer" },
+        "linear": { "type": "boolean" }
+      },
+      "required": ["measure", "bpm"],
       "additionalProperties": true
     }
   }

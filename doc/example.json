@@ -1,5 +1,10 @@
 {
   "tuning": [64, 59, 55, 50, 45, 40],
+  "automations": {
+    "tempo": [
+      { "measure": 0, "position": 0, "bpm": 120, "type": 4 }
+    ]
+  },
   "measures": [
     {
       "signature": [4, 4],
