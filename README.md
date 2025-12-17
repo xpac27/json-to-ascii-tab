@@ -113,6 +113,16 @@ Options:
 --per-line N    # number of rendered measures per line (default: 8)
 ```
 
+## AlphaText export (AlphaTab)
+
+You can convert the same JSON format into [AlphaTab](https://www.alphatab.net/) AlphaTex text using the companion script:
+
+```bash
+ruby json_to_alphatex.rb --json path/to/input.json --output output.atext
+```
+
+If `--output` is omitted, the AlphaTex content is printed to STDOUT. The exporter keeps metadata (title/instrument/part), propagates time-signature changes, emits tempo markings that occur at measure starts, and maps notes to string.fret tokens with rests filling incomplete measures.
+
 ---
 
 ## JSON Input Format
