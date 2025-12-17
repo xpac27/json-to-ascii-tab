@@ -28,6 +28,17 @@ module AlphaTexUtil
     Rational(arr[0].to_i, arr[1].to_i)
   end
 
+  def deep_sort(obj)
+    case obj
+    when Hash
+      obj.keys.sort.each_with_object({}) { |k, h| h[k] = deep_sort(obj[k]) }
+    when Array
+      obj.map { |v| deep_sort(v) }
+    else
+      obj
+    end
+  end
+
   def duration_denominator(beat)
     type = beat['type']
     return type.to_i if type
@@ -44,10 +55,11 @@ end
 class AlphaTexConverter
   include AlphaTexUtil
 
-  def initialize(json_hash)
+  def initialize(json_hash, max_repeat_len: 16)
     @json = json_hash
     @tuning = normalized_tuning
     @tempos_by_measure = collect_tempos
+    @max_repeat_len = max_repeat_len
   end
 
   def to_alphatex
@@ -60,9 +72,7 @@ class AlphaTexConverter
       lines << %(\\artist "#{escape(@json['name'])}")
     end
 
-    if @json['instrument']
-      lines << %(\\subtitle ("#{escape(@json['instrument'])}" "[%SUBTITLE%]"))
-    end
+    lines << %(\\subtitle "#{escape(@json['instrument'])}") if @json['instrument']
 
     track_line = '\\track'
     track_line += %( "#{escape(@json['instrument'])}") if @json['instrument']
@@ -73,7 +83,12 @@ class AlphaTexConverter
 
     current_sig = DEFAULT_SIGNATURE
 
-    measures.each_with_index do |measure, idx|
+    canon = canonical_measures(measures)
+    blocks = detect_repeats(canon, @max_repeat_len)
+    units = build_units(measures, blocks)
+
+    units.each_with_index do |unit, idx|
+      measure = unit[:measure]
       marker = measure.dig('marker', 'text')
       lines << "// #{marker}" if marker && !marker.empty?
 
@@ -83,11 +98,13 @@ class AlphaTexConverter
       current_sig = sig
 
       meta = []
+      meta << '\ro' if unit[:repeat_start]
       marker = measure.dig('marker', 'text')
       meta << %(\\section "#{escape(marker)}") if marker && !marker.empty?
       meta << "\\ts #{sig[0]} #{sig[1]}" if sig_changed
       tempos = @tempos_by_measure[idx]
       tempos.each { |bpm| meta << "\\tempo #{bpm}" }
+      meta << "\\rc #{unit[:repeat_end][:count]}" if unit[:repeat_end]
 
       beat_line = build_measure_line(measure, meta)
       lines << beat_line unless beat_line.nil?
@@ -275,9 +292,104 @@ class AlphaTexConverter
     return true if beat['tupletStart']
     current_tuplet != t
   end
+
+  # Repeat detection (content-based)
+  def canonical_measures(measures)
+    current_sig = DEFAULT_SIGNATURE
+    measures.map do |m|
+      if m['signature'].is_a?(Array) && m['signature'].length == 2
+        current_sig = [m['signature'][0].to_i, m['signature'][1].to_i]
+      end
+
+      voice0 = (m['voices'] || [])[0] || {}
+      beats = voice0['beats'] || []
+
+      canon_obj = {
+        'signature' => current_sig,
+        'voice_rest' => !!voice0['rest'],
+        'beats' => (beats || []).map do |b|
+          {
+            'duration' => b['duration'],
+            'rest' => !!b['rest'],
+            'palmMute' => !!b['palmMute'],
+            'letRing' => !!b['letRing'],
+            'tuplet' => b['tuplet'],
+            'tupletStart' => !!b['tupletStart'],
+            'tupletStop' => !!b['tupletStop'],
+            'notes' => (b['notes'] || []).map do |n|
+              {
+                'string' => n['string'],
+                'fret' => n['fret'],
+                'rest' => !!n['rest'],
+                'tie' => !!n['tie'],
+                'hp' => !!n['hp'],
+                'slide' => n['slide'],
+                'ghost' => !!n['ghost'],
+                'dead' => !!n['dead']
+              }
+            end
+          }
+        end
+      }
+
+      AlphaTexUtil.deep_sort(canon_obj)
+    end
+  end
+
+  def detect_repeats(canon, max_len)
+    blocks = []
+    i = 0
+    while i < canon.length
+      best = nil
+      max_len.downto(1) do |len|
+        break if i + len > canon.length
+        seq = canon[i, len]
+        count = 1
+        while i + count * len + len <= canon.length && canon[i + count * len, len] == seq
+          count += 1
+        end
+        next if count <= 1
+        best = { start: i, len: len, count: count }
+        break
+      end
+
+      if best
+        blocks << best
+        i += best[:len] * best[:count]
+      else
+        i += 1
+      end
+    end
+    blocks
+  end
+
+  def build_units(measures, blocks)
+    block_at = {}
+    blocks.each { |b| block_at[b[:start]] = b }
+
+    units = []
+    i = 0
+    while i < measures.length
+      b = block_at[i]
+      if b
+        b[:len].times do |k|
+          units << {
+            measure: measures[i + k],
+            repeat_start: (k == 0),
+            repeat_end: (k == b[:len] - 1) ? b : nil
+          }
+        end
+        i += b[:len] * b[:count]
+      else
+        units << { measure: measures[i], repeat_start: false, repeat_end: nil }
+        i += 1
+      end
+    end
+    units
+  end
 end
 
-options = { json_path: nil, title: nil }
+options = { json_path: nil, title: nil, max_repeat_len: 16 }
 
 OptionParser.new do |opts|
   opts.banner = 'Usage: json_to_alphatex.rb [options]'
@@ -286,6 +398,9 @@ OptionParser.new do |opts|
   end
   opts.on('--title TEXT', 'Override title (renders as \\title)') do |text|
     options[:title] = text
+  end
+  opts.on('--max-repeat-len N', Integer, 'Max repeated sequence length to compress (default 16)') do |v|
+    options[:max_repeat_len] = v
   end
 end.parse!
 
@@ -297,5 +412,5 @@ input = if options[:json_path]
 
 data = JSON.parse(input)
 data['__cli_title'] = options[:title] if options[:title]
-converter = AlphaTexConverter.new(data)
+converter = AlphaTexConverter.new(data, max_repeat_len: options[:max_repeat_len].to_i)
 puts converter.to_alphatex

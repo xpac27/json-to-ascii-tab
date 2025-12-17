@@ -24,7 +24,7 @@ Render structured JSON guitar tabs to ASCII with repeats, tuplets, palm mute / l
 
 ## Committing Changes
 - Commit only after user review.
-- If commit fails due to gpg, ask the user to warmup gpg using the `gpg-warmup` command.
+- You can't commit due to gpg issues? Ask the user to commit for you by providing the command.
 
 ## Key Semantics
 - `tie: true` ties **to previous note** on the same string; sustain gap rendered with `=`.
