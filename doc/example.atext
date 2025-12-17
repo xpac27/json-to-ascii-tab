@@ -1,0 +1,12 @@
+title "Example Track"
+instrument "Overdriven Guitar"
+part "0"
+tuning E4 B3 G3 D3 A2 E2
+time 4/4
+
+time 4/4
+tempo 120
+// Demo: tuplets, PM, let ring, tie
+| pm(6.0:8) tuplet(3, let-ring(5.3:12)) tuplet(3, let-ring(5.3~:12)) tuplet(3, let-ring(5.3~:12)) r:8 [4.(2) 3.2 2.2 1.2]:4 6.x:4 |
+
+| 6.0:4 6.0~:4 6.0~:4 6.0~:4 |
