@@ -32,6 +32,60 @@
         flex-wrap: wrap;
       }
 
+      .player {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin: 0 0 16px;
+        padding: 12px 16px;
+        background: rgba(30, 41, 59, 0.35);
+        border: 1px solid #1e293b;
+        border-radius: 12px;
+      }
+
+      .player button {
+        border: none;
+        border-radius: 10px;
+        padding: 10px 14px;
+        font-weight: 700;
+        letter-spacing: 0.01em;
+        cursor: pointer;
+        color: #0b1021;
+        background: linear-gradient(135deg, #22c55e, #16a34a);
+        box-shadow: 0 10px 24px rgba(34, 197, 94, 0.3);
+        transition: transform 150ms ease, box-shadow 150ms ease, filter 150ms ease;
+      }
+
+      .player button:disabled {
+        cursor: progress;
+        opacity: 0.6;
+        filter: grayscale(0.4);
+        box-shadow: none;
+      }
+
+      .player button:not(:disabled):hover,
+      .player button:not(:disabled):focus-visible {
+        transform: translateY(-1px);
+        box-shadow: 0 14px 28px rgba(34, 197, 94, 0.35);
+        filter: brightness(1.05);
+      }
+
+      .player-status {
+        margin: 0;
+        color: #cbd5e1;
+        font-size: 14px;
+      }
+
+      .player-time {
+        font-family: "JetBrains Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+        font-size: 13px;
+        color: #a5b4fc;
+        padding: 4px 8px;
+        border-radius: 8px;
+        background: rgba(15, 23, 42, 0.7);
+        border: 1px solid #1e293b;
+      }
+
       .file-label {
         display: inline-flex;
         align-items: center;
@@ -102,6 +156,13 @@
         <p class="status" id="status">Import a Guitar Pro, PowerTab, MusicXML or AlphaText file.</p>
       </div>
 
+      <div class="player">
+        <button id="play-pause" disabled>Play</button>
+        <button id="stop" disabled>Stop</button>
+        <p class="player-status" id="player-status">Player loading…</p>
+        <span class="player-time" id="player-time">00:00 / 00:00</span>
+      </div>
+
       <div class="alpha-tab" id="alpha-tab"></div>
     </main>
 
@@ -109,6 +170,10 @@
       const fileInput = document.getElementById('file-input');
       const status = document.getElementById('status');
       const alphaTabContainer = document.getElementById('alpha-tab');
+      const playPauseButton = document.getElementById('play-pause');
+      const stopButton = document.getElementById('stop');
+      const playerStatus = document.getElementById('player-status');
+      const playerTime = document.getElementById('player-time');
 
       const api = new alphaTab.AlphaTabApi(alphaTabContainer, {
         player: { enablePlayer: true, soundFont: "ext/sonivox.sf3" }
@@ -125,6 +190,48 @@
       api.error.on((err) => {
         console.error(err);
         status.textContent = "Unable to read this file. Check its format.";
+      });
+
+      api.soundFontLoad.on((evt) => {
+        const percent = Math.floor((evt.loaded / evt.total) * 100);
+        playerStatus.textContent = `Loading sounds: ${percent}%`;
+      });
+
+      api.playerReady.on(() => {
+        playerStatus.textContent = 'Player ready.';
+        playPauseButton.disabled = false;
+        stopButton.disabled = false;
+      });
+
+      api.playerStateChanged.on((evt) => {
+        const isPlaying = evt.state === alphaTab.synth.PlayerState.Playing;
+        playPauseButton.textContent = isPlaying ? 'Pause' : 'Play';
+      });
+
+      function formatDuration(ms) {
+        const totalSeconds = Math.max(0, Math.floor(ms / 1000));
+        const minutes = Math.floor(totalSeconds / 60).toString().padStart(2, '0');
+        const seconds = (totalSeconds % 60).toString().padStart(2, '0');
+        return `${minutes}:${seconds}`;
+      }
+
+      let previousTime = -1;
+      api.playerPositionChanged.on((evt) => {
+        const currentSeconds = Math.floor(evt.currentTime / 1000);
+        if (currentSeconds === previousTime) return;
+        previousTime = currentSeconds;
+
+        playerTime.textContent = `${formatDuration(evt.currentTime)} / ${formatDuration(evt.endTime)}`;
+      });
+
+      playPauseButton.addEventListener('click', () => {
+        if (playPauseButton.disabled) return;
+        api.playPause();
+      });
+
+      stopButton.addEventListener('click', () => {
+        if (stopButton.disabled) return;
+        api.stop();
       });
 
       fileInput.addEventListener('change', (event) => {
