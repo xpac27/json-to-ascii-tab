@@ -129,10 +129,27 @@
         min-height: 320px;
         box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05),
           0 18px 45px rgba(0, 0, 0, 0.35);
+        position: relative;
+        overflow: auto;
       }
 
       .alphaTabSurface {
         width: 100% !important;
+      }
+
+      /* Playback cursor/selection styles */
+      .at-cursor-bar {
+        background: rgba(34, 197, 94, 0.08);
+      }
+
+      .at-cursor-beat {
+        background: rgba(59, 130, 246, 0.85);
+        width: 3px;
+      }
+
+      .at-highlight * {
+        fill: #0f172a;
+        stroke: #0f172a;
       }
 
       @media (max-width: 720px) {
@@ -176,7 +193,11 @@
       const playerTime = document.getElementById('player-time');
 
       const api = new alphaTab.AlphaTabApi(alphaTabContainer, {
-        player: { enablePlayer: true, soundFont: "ext/sonivox.sf3" }
+        player: {
+          enablePlayer: true,
+          soundFont: "ext/sonivox.sf3",
+          scrollElement: alphaTabContainer
+        }
       });
 
       api.renderStarted.on(() => {
