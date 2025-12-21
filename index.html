@@ -344,6 +344,18 @@
         api.print();
       });
 
+      document.addEventListener('keydown', (event) => {
+        if (event.code !== 'Space') return;
+        const target = event.target;
+        if (target instanceof HTMLElement) {
+          const tagName = target.tagName.toLowerCase();
+          if (tagName === 'input' || tagName === 'textarea' || target.isContentEditable) return;
+        }
+        event.preventDefault();
+        if (playPauseButton.disabled) return;
+        api.playPause();
+      });
+
       fileInput.addEventListener('change', (event) => {
         const file = event.target.files?.[0];
         if (!file) {
