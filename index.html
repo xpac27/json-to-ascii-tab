@@ -227,7 +227,7 @@
         <input
           type="file"
           id="file-input"
-          accept=".gp,.gp3,.gp4,.gp5,.gpx,.ptb,.xml,.mxl,.musicxml,.atext"
+          accept=".gp,.gp3,.gp4,.gp5,.gpx,.ptb,.xml,.mxl,.musicxml,.atext,.json"
           hidden
         >
         <button class="print-button" id="print-button" type="button" hidden>Print</button>
@@ -239,12 +239,13 @@
         <button id="play-pause" aria-label="Play" disabled></button>
         <p class="player-status" id="player-status">Player loading…</p>
         <span class="player-time" id="player-time">00:00 / 00:00</span>
-        <p class="status" id="status">Import a Guitar Pro, PowerTab, MusicXML or AlphaText file.</p>
+        <p class="status" id="status">Import a Guitar Pro, PowerTab, MusicXML, AlphaText, or score-JSON file.</p>
       </div>
 
       <div class="alpha-tab" id="alpha-tab"></div>
     </main>
 
+    <script src="jsonToAlphaText.js"></script>
     <script>
       const fileInput = document.getElementById('file-input');
       const status = document.getElementById('status');
@@ -356,6 +357,10 @@
         api.playPause();
       });
 
+      function titleFromFilename(filename) {
+        return filename.replace(/\\.json$/i, '').replace(/_/g, ' ').trim();
+      }
+
       fileInput.addEventListener('change', (event) => {
         const file = event.target.files?.[0];
         if (!file) {
@@ -378,7 +383,23 @@
             return;
           }
 
-          api.tex(content);
+          const fileName = file.name || '';
+          const isJson = fileName.toLowerCase().endsWith('.json');
+          try {
+            if (isJson) {
+              const parsed = JSON.parse(content);
+              const title = titleFromFilename(fileName);
+              const alphatex = window.jsonToAlphaText(parsed, { title });
+              api.tex(alphatex);
+            } else {
+              api.tex(content);
+            }
+          } catch (error) {
+            console.error(error);
+            const message = error instanceof Error ? error.message : 'Unknown conversion error.';
+            status.textContent = `Unable to convert this JSON file: ${message}`;
+            status.hidden = false;
+          }
         };
 
         reader.onerror = () => {

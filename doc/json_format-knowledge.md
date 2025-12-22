@@ -208,6 +208,9 @@ It is rendered as a comment above the tab block.
 | `palmMute`    | boolean         | optional | Beat is palm-muted                       |
 | `letRing`     | boolean         | optional | Notes are allowed to ring                |
 
+Notes:
+* When `dots` is used, some data sources encode the dotted value directly in `duration` (e.g. `duration: [3,8]` with `dots: 1` for a dotted quarter). Consumers should treat this as a dotted base duration rather than rejecting the numerator.
+
 ### Tuplet semantics
 
 * If `tupletStart` / `tupletStop` are present, they define the group.
