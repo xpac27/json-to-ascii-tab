@@ -358,7 +358,14 @@
       });
 
       function titleFromFilename(filename) {
-        return filename.replace(/\\.json$/i, '').replace(/_/g, ' ').trim();
+        const base = filename.replace(/\\.json$/i, '').replace(/_/g, ' ').trim();
+        const dashParts = base.split('-').map((part) => part.trim()).filter(Boolean);
+        const parts = dashParts.length > 0 ? dashParts : base.split(' ').map((part) => part.trim()).filter(Boolean);
+        const first = parts[0] ?? '';
+        const second = parts[1] ?? '';
+        if (!first) return '';
+        const rawTitle = second ? `${first} - ${second}` : first;
+        return rawTitle.replace(/\S+/g, (word) => word[0].toUpperCase() + word.slice(1).toLowerCase());
       }
 
       fileInput.addEventListener('change', (event) => {
