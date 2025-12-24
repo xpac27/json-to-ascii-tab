@@ -8,7 +8,7 @@
 - read index.html
 - ignore any existing ruby code in the current repository
 - implement a conversion from score-JSON to alphatext format as per the following specifications:
-  - implement the conversion from score-JSON to alphatext in Typescript in a new file called jsonToAlphaText.ts
+  - implement the conversion from score-JSON to alphatext in javascript in a new file called jsonToAlphaText.ts
   - change index.html so that when loading a file, if the file is a JSON file then assume it is using the score-JSON format and convert it to alphatext format, then displays it using the existing alphatext rendering code
   - print an error message if the conversion fails or the input format is invalid and explaining what went wrong
   - make use of the following alphatext features when rendering the converted score:
