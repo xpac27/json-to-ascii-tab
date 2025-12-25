@@ -6,7 +6,7 @@ require 'open3'
 class TempoLabelAlignmentTest < Minitest::Test
   def test_tempo_label_is_left_aligned_inside_measure_box
     script = File.expand_path('../json_to_ascii_tab.rb', __dir__)
-    fixture = File.expand_path('../documentation/examples/example.json', __dir__)
+    fixture = File.expand_path('../../documentation/examples/example.json', __dir__)
 
     stdout, stderr, status = Open3.capture3('ruby', script, '--json', fixture)
 

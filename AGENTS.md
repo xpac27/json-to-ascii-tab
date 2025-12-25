@@ -4,17 +4,17 @@
 Render structured JSON guitar tabs to ASCII with repeats, tuplets, palm mute / let ring rails, tie-to-previous sustain, tempo labels at measure starts, and optional metadata header banner.
 
 ## Directory Structure
-- `tests` - test cases and fixtures
+- `extras/tests` - test cases and fixtures
 - `doc` - documentation, JSON format spec, examples
 - `tabs` - IGNORE THIS FOLDER
-- `json_to_ascii_tab.rb` - main conversion script
+- `extras/json_to_ascii_tab.rb` - main conversion script
 - `README.md` - overview and usage instructions
 
 ## Default Flow for Changes
-- Implement the code change (usually in `json_to_ascii_tab.rb`); keep defaults (4/4, standard tuning) intact.
+- Implement the code change (usually in `extras/json_to_ascii_tab.rb`); keep defaults (4/4, standard tuning) intact.
 - If behavior/output changes, suggest the required edits to `documentation/examples/example.json` accordingly. Wait for the user to confirm the changes.
-- Sync tests with fixtures: update `tests/example_test.rb` to assert new behavior. Consider adding tests and ask the user if you find relevant ones.
-- Run tests: `ruby -Itests tests/example_test.rb` plus other tests from the `tests/` folder.
+- Sync tests with fixtures: update `extras/tests/example_test.rb` to assert new behavior. Consider adding tests and ask the user if you find relevant ones.
+- Run tests: `ruby -Iextras/tests extras/tests/example_test.rb` plus other tests from the `extras/tests/` folder.
 - Fix code/fixtures until tests pass.
 - Refresh docs:
   - `README.md` (feature notes, rendered example snippet if output changed)

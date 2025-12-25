@@ -6,7 +6,7 @@ require 'open3'
 class AlphaTexConversionTest < Minitest::Test
   def test_converts_example_json_to_alphatex
     script = File.expand_path('../json_to_alphatex.rb', __dir__)
-    fixture = File.expand_path('../documentation/examples/example.json', __dir__)
+    fixture = File.expand_path('../../documentation/examples/example.json', __dir__)
 
     stdout, stderr, status = Open3.capture3('ruby', script, '--json', fixture)
 
@@ -25,7 +25,7 @@ class AlphaTexConversionTest < Minitest::Test
 
   def test_cli_title_overrides_title_keyword
     script = File.expand_path('../json_to_alphatex.rb', __dir__)
-    fixture = File.expand_path('../documentation/examples/example.json', __dir__)
+    fixture = File.expand_path('../../documentation/examples/example.json', __dir__)
 
     stdout, stderr, status = Open3.capture3('ruby', script, '--json', fixture, '--title', 'Custom Title')
 
