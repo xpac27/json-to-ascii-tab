@@ -3,10 +3,12 @@ require "capybara/cuprite"
 require "rspec/expectations"
 require "rack"
 require "rack/files"
+require "webrick"
 
 public_root = File.expand_path("../../public", __dir__)
 
 Capybara.app = Rack::Files.new(public_root)
+Capybara.server = :webrick
 
 Capybara.register_driver(:cuprite) do |app|
   Capybara::Cuprite::Driver.new(
