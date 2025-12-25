@@ -5,5 +5,6 @@ group :test do
   gem "cucumber"
   gem "cuprite"
   gem "rack"
+  gem "rackup"
   gem "rspec-expectations"
 end
