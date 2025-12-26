@@ -115,7 +115,7 @@ function findSimpleRepeats(fps, boundaries, opts) {
         printedLen: len,
         spanEnd,
       });
-      candidates.push(candidate);
+      if (candidate) candidates.push(candidate);
     }
   }
 
@@ -164,7 +164,7 @@ function findVoltas(fps, boundaries, opts) {
             printedLen,
             spanEnd: repeatEnd,
           });
-          candidates.push(candidate);
+          if (candidate) candidates.push(candidate);
         }
       }
     }
@@ -177,6 +177,7 @@ function buildCandidate(repeat, voltas, repeatLen, details) {
   const saved = details.expandedLen - details.printedLen;
   const constructs = 1 + (voltas ? voltas.length : 0);
   const score = saved * 10 - constructs;
+  if (score <= 0) return null;
 
   return {
     repeat,
@@ -197,10 +198,22 @@ function selectRepeatSet(candidates, opts) {
   if (candidates.length === 0) return null;
 
   if (!opts.allowMultipleRepeats) {
-    const best = candidates.reduce((bestSoFar, candidate) => {
-      if (!bestSoFar) return candidate;
-      return compareRepeat(candidate, bestSoFar) < 0 ? candidate : bestSoFar;
-    }, null);
+    let best = null;
+    candidates.forEach((candidate) => {
+      if (!best) {
+        best = candidate;
+        return;
+      }
+      if (candidate.score !== best.score) {
+        best = candidate.score > best.score ? candidate : best;
+        return;
+      }
+      if (candidate.constructs !== best.constructs) {
+        best = candidate.constructs < best.constructs ? candidate : best;
+        return;
+      }
+      if (compareRepeat(candidate, best) < 0) best = candidate;
+    });
     return best ? { score: best.score, constructs: best.constructs, repeats: [best] } : null;
   }
 
@@ -209,56 +222,80 @@ function selectRepeatSet(candidates, opts) {
     return a.start - b.start;
   });
 
+  const ends = sorted.map((candidate) => candidate.spanEnd);
   const prevIndex = new Array(sorted.length).fill(-1);
   for (let i = 0; i < sorted.length; i += 1) {
-    for (let j = i - 1; j >= 0; j -= 1) {
-      if (sorted[j].spanEnd < sorted[i].start) {
-        prevIndex[i] = j;
-        break;
-      }
-    }
+    prevIndex[i] = binarySearchPrev(ends, sorted[i].start);
   }
 
   const dp = new Array(sorted.length);
   for (let i = 0; i < sorted.length; i += 1) {
-    const include = buildPlanSet(sorted, prevIndex, dp, i, true);
+    const include = buildPlanSet(sorted, prevIndex, dp, i);
     const exclude = i > 0 ? dp[i - 1] : buildEmptyPlanSet();
     dp[i] = betterPlanSet(include, exclude);
   }
 
   const best = dp[dp.length - 1];
-  if (!best || best.repeats.length === 0) return null;
-  return best;
+  if (!best || !best.node) return null;
+  return { score: best.score, constructs: best.constructs, repeats: nodeToList(best.node) };
 }
 
-function buildPlanSet(sorted, prevIndex, dp, i, includeCurrent) {
-  if (!includeCurrent) return buildEmptyPlanSet();
+function buildPlanSet(sorted, prevIndex, dp, i) {
   const prev = prevIndex[i] >= 0 ? dp[prevIndex[i]] : buildEmptyPlanSet();
-  const repeat = sorted[i];
   return {
-    score: prev.score + repeat.score,
-    constructs: prev.constructs + repeat.constructs,
-    repeats: [...prev.repeats, repeat],
+    score: prev.score + sorted[i].score,
+    constructs: prev.constructs + sorted[i].constructs,
+    node: buildRepeatNode(sorted[i], prev.node),
   };
 }
 
 function buildEmptyPlanSet() {
-  return { score: 0, constructs: 0, repeats: [] };
+  return { score: 0, constructs: 0, node: null };
 }
 
 function betterPlanSet(a, b) {
   if (a.score !== b.score) return a.score > b.score ? a : b;
   if (a.constructs !== b.constructs) return a.constructs < b.constructs ? a : b;
-  return compareRepeatLists(a.repeats, b.repeats) <= 0 ? a : b;
+  return compareRepeatNodes(a.node, b.node) <= 0 ? a : b;
 }
 
-function compareRepeatLists(a, b) {
+function compareRepeatNodes(aNode, bNode) {
+  const a = nodeToList(aNode);
+  const b = nodeToList(bNode);
   const len = Math.min(a.length, b.length);
   for (let i = 0; i < len; i += 1) {
     const cmp = compareRepeat(a[i], b[i]);
     if (cmp !== 0) return cmp;
   }
   return a.length - b.length;
+}
+
+function buildRepeatNode(repeat, prev) {
+  return { repeat, prev, list: null };
+}
+
+function nodeToList(node) {
+  if (!node) return [];
+  if (node.list) return node.list;
+  const list = nodeToList(node.prev);
+  node.list = list.concat(node.repeat);
+  return node.list;
+}
+
+function binarySearchPrev(ends, start) {
+  let low = 0;
+  let high = ends.length - 1;
+  let result = -1;
+  while (low <= high) {
+    const mid = Math.floor((low + high) / 2);
+    if (ends[mid] < start) {
+      result = mid;
+      low = mid + 1;
+    } else {
+      high = mid - 1;
+    }
+  }
+  return result;
 }
 
 function compareRepeat(a, b) {
