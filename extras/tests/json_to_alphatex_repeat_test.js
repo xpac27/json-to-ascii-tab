@@ -16,6 +16,25 @@ function makeMeasure(fret) {
   };
 }
 
+function makeRestMeasure() {
+  return {
+    voices: [
+      {
+        beats: [
+          {
+            notes: [{ rest: true }],
+            type: 1,
+            rest: true,
+            duration: [1, 1],
+          },
+        ],
+        rest: true,
+      },
+    ],
+    rest: true,
+  };
+}
+
 function assertIncludes(output, needle) {
   assert(
     output.includes(needle),
@@ -89,9 +108,23 @@ function testMultipleRepeats() {
   assert.strictEqual(repeatEnds, 2);
 }
 
+function testLongRestRepeat() {
+  const measures = Array.from({ length: 92 }, () => makeRestMeasure());
+  const score = { measures };
+  const output = jsonToAlphaText(score);
+  const repeatStarts = output.split('\\ro').length - 1;
+  const repeatEnds = output.split('\\rc').length - 1;
+  const voltas = output.split('\\ae').length - 1;
+  assert.strictEqual(repeatStarts, 1);
+  assert.strictEqual(repeatEnds, 1);
+  assert.strictEqual(voltas, 0);
+  assertIncludes(output, '\\rc 92');
+}
+
 testSimpleRepeat();
 testVoltaRepeat();
 testMultiPassRepeat();
 testMultipleRepeats();
+testLongRestRepeat();
 
 console.log('alphatex repeat inference tests: ok');

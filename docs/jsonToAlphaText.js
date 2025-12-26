@@ -188,8 +188,11 @@ function inferRepeats(score, measureInfos, tempoMap, options) {
   const maxRepeatLen = Number.isInteger(options.maxRepeatLen)
     ? options.maxRepeatLen
     : 16;
+  const minRepeatLen = Number.isInteger(options.minRepeatLen)
+    ? options.minRepeatLen
+    : 1;
 
-  return repeatInference.inferFoldPlan(adapter, { maxRepeatLen });
+  return repeatInference.inferFoldPlan(adapter, { maxRepeatLen, minRepeatLen });
 }
 
 function buildBoundaryIds(measureInfos, tempoMap) {

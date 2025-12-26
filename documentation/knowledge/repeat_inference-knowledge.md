@@ -106,6 +106,7 @@ Options:
 
 - `inferRepeats` (default `true`): disable repeat inference when `false`.
 - `maxRepeatLen` (default `16`): maximum repeated block length for inference.
+- `minRepeatLen` (default `1` for AlphaText integration): minimum repeated block length.
 
 ## Test Coverage
 

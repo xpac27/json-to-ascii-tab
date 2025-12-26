@@ -138,6 +138,7 @@ function findVoltas(fps, boundaries, opts) {
           if (end >= total) break;
           if (spanHasBoundary(boundaries, start, end)) continue;
           if (!segmentsEqual(fps, start, secondStart, prefixLen)) continue;
+          if (endLen1 === endLen2 && segmentsEqual(fps, start + prefixLen, secondEnd, endLen1)) continue;
 
           const repeatStart = start;
           const repeatEnd = end;
