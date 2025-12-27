@@ -29,5 +29,8 @@ jobs:
       - name: Run alphatex repeat inference tests
         run: node extras/tests/json_to_alphatex_repeat_test.js
 
+      - name: Run alphatex props tests
+        run: node extras/tests/json_to_alphatex_props_test.js
+
       - name: Run Cucumber
         run: bundle exec cucumber

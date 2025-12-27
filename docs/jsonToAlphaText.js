@@ -352,6 +352,8 @@ function beatDuration(beat, measureIndex, voiceIndex) {
 function formatBeat(beat, previousNotes, tempo, voiceIndex) {
   const props = [];
   if (tempo !== undefined) props.push(`tempo ${tempo}`);
+  if (beat.palmMute) props.push('pm');
+  if (beat.letRing) props.push('lr');
 
   const dots = beat.dots ?? 0;
   if (dots >= 2) {
@@ -483,8 +485,6 @@ function formatNoteProps(note, beat) {
   const props = [];
   if (note.ghost) props.push('g');
   if (note.hp) props.push('h');
-  if (beat.palmMute) props.push('pm');
-  if (beat.letRing) props.push('lr');
   return props;
 }
 
