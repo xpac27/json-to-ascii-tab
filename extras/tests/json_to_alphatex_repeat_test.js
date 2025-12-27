@@ -131,7 +131,8 @@ function testMultiBarRestEnabled() {
     measures: [makeMeasure(1)],
   };
   const output = jsonToAlphaText(score);
-  assertIncludes(output, '\\multiBarRest');
+  const count = output.split('\\multiBarRest').length - 1;
+  assert(count >= 2, `Expected multiBarRest tag twice, got ${count}\n${output}`);
 }
 
 function testNoRepeatForSilentMeasures() {

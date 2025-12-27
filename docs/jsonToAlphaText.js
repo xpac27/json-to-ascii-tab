@@ -31,6 +31,7 @@ function jsonToAlphaText(raw, options = {}) {
     lines.push('\\track');
   }
 
+  lines.push('  \\multiBarRest');
   lines.push('  \\staff {tabs}');
   lines.push(`  \\tuning (${formatTuning(score.tuning)})`);
 
