@@ -23,15 +23,13 @@ function jsonToAlphaText(raw, options = {}) {
   if (title) lines.push(`\\title "${escapeText(title)}"`);
   if (score.name) lines.push(`\\artist "${escapeText(score.name)}"`);
   if (score.instrument) lines.push(`\\subtitle "${escapeText(score.instrument)}"`);
-  lines.push('\\multiBarRest');
 
   if (score.instrument) {
-    lines.push(`\\track "${escapeText(score.instrument)}"`);
+    lines.push(`\\track "${escapeText(score.instrument)}" { multiBarRest }`);
   } else {
-    lines.push('\\track');
+    lines.push('\\track { multiBarRest }');
   }
 
-  lines.push('  \\multiBarRest');
   lines.push('  \\staff {tabs}');
   lines.push(`  \\tuning (${formatTuning(score.tuning)})`);
 
