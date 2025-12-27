@@ -56,7 +56,7 @@ function assertUnrollMatches(tokens, result) {
 function testSimpleRepeat() {
   const tokens = ['A', 'B', 'C', 'A', 'B', 'C', 'D'];
   const adapter = makeAdapter(tokens);
-  const result = inferFoldPlan(adapter);
+  const result = inferFoldPlan(adapter, { minRepeatLen: 2 });
   assert(result.plan);
   assert.strictEqual(result.plan.repeats.length, 1);
   assert.strictEqual(renderFolded(tokens, result), '|: A B C :| D');
@@ -66,7 +66,7 @@ function testSimpleRepeat() {
 function testVolta() {
   const tokens = ['A', 'B', 'X', 'A', 'B', 'Y', 'D'];
   const adapter = makeAdapter(tokens);
-  const result = inferFoldPlan(adapter);
+  const result = inferFoldPlan(adapter, { minRepeatLen: 2 });
   assert(result.plan);
   assert.strictEqual(result.plan.repeats.length, 1);
   assert.strictEqual(renderFolded(tokens, result), '|: A B 1.[X] 2.[Y] :| D');
@@ -86,7 +86,7 @@ function testBoundaryStopsFold() {
 function testMultiPassRepeat() {
   const tokens = ['A', 'B', 'A', 'B', 'A', 'B', 'C'];
   const adapter = makeAdapter(tokens);
-  const result = inferFoldPlan(adapter);
+  const result = inferFoldPlan(adapter, { minRepeatLen: 2 });
   assert(result.plan);
   assert.strictEqual(result.plan.repeats.length, 1);
   assert.strictEqual(result.plan.repeats[0].times, 3);
@@ -96,7 +96,7 @@ function testMultiPassRepeat() {
 function testMultipleRepeats() {
   const tokens = ['A', 'B', 'A', 'B', 'C', 'D', 'C', 'D', 'E'];
   const adapter = makeAdapter(tokens);
-  const result = inferFoldPlan(adapter);
+  const result = inferFoldPlan(adapter, { minRepeatLen: 2 });
   assert(result.plan);
   assert.strictEqual(result.plan.repeats.length, 2);
   assertUnrollMatches(tokens, result);
@@ -121,10 +121,7 @@ function testBoundaryCapsRepeatCountDefault() {
   boundaries[4] = 'tempo';
   const adapter = makeAdapter(tokens, boundaries);
   const result = inferFoldPlan(adapter);
-  assert(result.plan);
-  assert.strictEqual(result.plan.repeats.length, 2);
-  assert.strictEqual(result.plan.repeats[0].times, 2);
-  assert.strictEqual(result.plan.repeats[1].times, 2);
+  assert.strictEqual(result.plan, null);
   assertUnrollMatches(tokens, result);
 }
 

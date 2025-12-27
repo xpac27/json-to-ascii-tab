@@ -53,7 +53,7 @@ function testSimpleRepeat() {
   const score = {
     measures: [makeMeasure(1), makeMeasure(2), makeMeasure(1), makeMeasure(2), makeMeasure(3)],
   };
-  const output = jsonToAlphaText(score);
+  const output = jsonToAlphaText(score, { minRepeatLen: 2 });
   assertIncludes(output, '\\ro');
   assertMatches(output);
 }
@@ -70,7 +70,7 @@ function testVoltaRepeat() {
       makeMeasure(5),
     ],
   };
-  const output = jsonToAlphaText(score);
+  const output = jsonToAlphaText(score, { minRepeatLen: 2 });
   assertIncludes(output, '\\ro');
   assertIncludes(output, '\\ae 1');
   assertIncludes(output, '\\ae 2');
@@ -89,7 +89,7 @@ function testMultiPassRepeat() {
       makeMeasure(3),
     ],
   };
-  const output = jsonToAlphaText(score);
+  const output = jsonToAlphaText(score, { minRepeatLen: 2 });
   assertIncludes(output, '\\ro');
   assertMatches(output);
 }
@@ -108,7 +108,7 @@ function testMultipleRepeats() {
       makeMeasure(5),
     ],
   };
-  const output = jsonToAlphaText(score);
+  const output = jsonToAlphaText(score, { minRepeatLen: 2 });
   const repeatStarts = output.split('\\ro').length - 1;
   const repeatEnds = output.split('\\rc').length - 1;
   assert.strictEqual(repeatStarts, 2);
@@ -131,6 +131,17 @@ function testLongRestRepeat() {
 function testNoSingleMeasureRepeatForNonSilent() {
   const score = {
     measures: [makeMeasure(1), makeMeasure(1), makeMeasure(1)],
+  };
+  const output = jsonToAlphaText(score);
+  const repeatStarts = output.split('\\ro').length - 1;
+  const repeatEnds = output.split('\\rc').length - 1;
+  assert.strictEqual(repeatStarts, 0);
+  assert.strictEqual(repeatEnds, 0);
+}
+
+function testDefaultMinRepeatLenBlocksShortNonSilent() {
+  const score = {
+    measures: [makeMeasure(1), makeMeasure(2), makeMeasure(1), makeMeasure(2)],
   };
   const output = jsonToAlphaText(score);
   const repeatStarts = output.split('\\ro').length - 1;
@@ -173,6 +184,7 @@ testMultiPassRepeat();
 testMultipleRepeats();
 testLongRestRepeat();
 testNoSingleMeasureRepeatForNonSilent();
+testDefaultMinRepeatLenBlocksShortNonSilent();
 testTempoSegmentedRestRepeats();
 
 console.log('alphatex repeat inference tests: ok');

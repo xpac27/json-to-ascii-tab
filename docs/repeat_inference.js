@@ -1,5 +1,5 @@
 const DEFAULT_OPTIONS = {
-  minRepeatLen: 2,
+  minRepeatLen: 4,
   maxRepeatLen: 16,
   minPrefixLen: 2,
   maxEndingLen: 8,

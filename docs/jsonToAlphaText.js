@@ -196,7 +196,7 @@ function inferRepeats(score, measureInfos, tempoMap, options) {
     : 16;
   const minRepeatLen = Number.isInteger(options.minRepeatLen)
     ? options.minRepeatLen
-    : 2;
+    : 4;
 
   return repeatInference.inferFoldPlan(adapter, { maxRepeatLen, minRepeatLen });
 }
