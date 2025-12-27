@@ -78,7 +78,7 @@ String is 1-based in AlphaText (string 1 is the highest string).
 - `g` ghost note
 - `h` hammer-on / pull-off
 - `pm` palm mute
-- `lr` let ring
+- `lr` let ring (note: AlphaTab's AlphaText parser rejects `lr` in practice; this converter omits it)
 
 Properties are attached in braces after the note:
 
@@ -86,12 +86,12 @@ Properties are attached in braces after the note:
 
 ### Ties
 
-Tied notes can be represented using `-` in place of the fret:
+Tied notes are rendered using the note property `t`:
 
-`-.2`
+`3.2{t}`
 
 AlphaTab infers the tie target from the previous note on the same string.
-This converter uses `-` only when a prior note exists on the same string.
+This converter only emits `{t}` when a prior note exists on the same string.
 
 ## Comments
 

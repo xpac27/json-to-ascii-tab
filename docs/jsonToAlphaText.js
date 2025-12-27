@@ -36,7 +36,7 @@ function jsonToAlphaText(raw, options = {}) {
   const tempoMap = buildTempoMap(score.automations?.tempo);
 
   let currentSignature = [4, 4];
-  let previousNotes = Array(6).fill(false);
+  let previousFrets = Array(6).fill(null);
   const measureInfos = [];
 
   score.measures.forEach((measure, measureIndex) => {
@@ -57,15 +57,15 @@ function jsonToAlphaText(raw, options = {}) {
       tokens.push(`\\ts ${currentSignature[0]} ${currentSignature[1]}`);
     }
 
-    let measurePreviousNotes = previousNotes;
+    let measurePreviousFrets = previousFrets;
     beats.forEach((beat, beatIndex) => {
       const beatTempo = beatIndex === 0 ? tempoMap.get(measureIndex) : undefined;
-      const { token, nextNotes } = formatBeat(beat, measurePreviousNotes, beatTempo, 0);
-      measurePreviousNotes = nextNotes;
+      const { token, nextFrets } = formatBeat(beat, measurePreviousFrets, beatTempo, 0);
+      measurePreviousFrets = nextFrets;
       tokens.push(token);
     });
 
-    previousNotes = measurePreviousNotes;
+    previousFrets = measurePreviousFrets;
 
     measureInfos.push({
       measure,
@@ -349,11 +349,10 @@ function beatDuration(beat, measureIndex, voiceIndex) {
   return reduceFraction({ n, d });
 }
 
-function formatBeat(beat, previousNotes, tempo, voiceIndex) {
+function formatBeat(beat, previousFrets, tempo, voiceIndex) {
   const props = [];
   if (tempo !== undefined) props.push(`tempo ${tempo}`);
   if (beat.palmMute) props.push('pm');
-  if (beat.letRing) props.push('lr');
 
   const dots = beat.dots ?? 0;
   if (dots >= 2) {
@@ -365,14 +364,14 @@ function formatBeat(beat, previousNotes, tempo, voiceIndex) {
   const durationInfo = resolveDuration(beat, voiceIndex);
   if (durationInfo.tuplet) props.push(`tu ${durationInfo.tuplet}`);
 
-  const { content, nextNotes } = formatBeatContent(beat, previousNotes, voiceIndex);
+  const { content, nextFrets } = formatBeatContent(beat, previousFrets, voiceIndex);
   const beatToken = `${content}.${durationInfo.duration}`;
 
   if (props.length > 0) {
-    return { token: `${beatToken} {${props.join(' ')}}`, nextNotes };
+    return { token: `${beatToken} {${props.join(' ')}}`, nextFrets };
   }
 
-  return { token: beatToken, nextNotes };
+  return { token: beatToken, nextFrets };
 }
 
 function resolveDuration(beat, voiceIndex) {
@@ -429,9 +428,9 @@ function baseDurationFromDottedFraction(numerator, denominator, dots) {
   return null;
 }
 
-function formatBeatContent(beat, previousNotes, voiceIndex) {
+function formatBeatContent(beat, previousFrets, voiceIndex) {
   if (beat.rest) {
-    return { content: 'r', nextNotes: Array(6).fill(false) };
+    return { content: 'r', nextFrets: Array(6).fill(null) };
   }
 
   const notes = Array.isArray(beat.notes) ? beat.notes : [];
@@ -452,28 +451,33 @@ function formatBeatContent(beat, previousNotes, voiceIndex) {
   }
 
   const sorted = Array.from(notesByString.entries()).sort((a, b) => a[0] - b[0]);
-  const nextNotes = Array(6).fill(false);
+  const nextFrets = Array(6).fill(null);
   const tokens = sorted.map(([stringIndex, note]) => {
-    nextNotes[stringIndex] = true;
-    const hasPrev = previousNotes[stringIndex];
+    const prevFret = previousFrets[stringIndex];
+    const hasPrev = Number.isInteger(prevFret);
     const effectiveTie = Boolean(note.tie && hasPrev);
     if (note.tie && !hasPrev && !Number.isInteger(note.fret)) {
       throw new Error(`Tie without a previous note on string ${note.string + 1} in voice ${voiceIndex + 1}.`);
     }
-    const value = formatNoteValue(note, voiceIndex, effectiveTie);
-    const props = formatNoteProps(note, beat);
+    const value = formatNoteValue(note, voiceIndex, effectiveTie, prevFret);
+    if (!effectiveTie && Number.isInteger(note.fret)) {
+      nextFrets[stringIndex] = note.fret;
+    } else if (effectiveTie && Number.isInteger(prevFret)) {
+      nextFrets[stringIndex] = prevFret;
+    }
+    const props = formatNoteProps(note, beat, effectiveTie);
     return props.length > 0 ? `${value}.${stringIndex + 1}{${props.join(' ')}}` : `${value}.${stringIndex + 1}`;
   });
 
   if (tokens.length === 1) {
-    return { content: tokens[0], nextNotes };
+    return { content: tokens[0], nextFrets };
   }
 
-  return { content: `(${tokens.join(' ')})`, nextNotes };
+  return { content: `(${tokens.join(' ')})`, nextFrets };
 }
 
-function formatNoteValue(note, voiceIndex, effectiveTie) {
-  if (effectiveTie) return '-';
+function formatNoteValue(note, voiceIndex, effectiveTie, previousFret) {
+  if (effectiveTie && Number.isInteger(previousFret)) return String(previousFret);
   if (note.dead) return 'x';
   if (!Number.isInteger(note.fret) || note.fret < 0) {
     throw new Error(`Note fret must be a non-negative integer in voice ${voiceIndex + 1}.`);
@@ -481,10 +485,11 @@ function formatNoteValue(note, voiceIndex, effectiveTie) {
   return String(note.fret);
 }
 
-function formatNoteProps(note, beat) {
+function formatNoteProps(note, beat, effectiveTie) {
   const props = [];
   if (note.ghost) props.push('g');
   if (note.hp) props.push('h');
+  if (effectiveTie) props.push('t');
   return props;
 }
 
