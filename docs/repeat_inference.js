@@ -12,11 +12,14 @@ function inferFoldPlan(adapter, options = {}) {
   const length = adapter.len();
   const fingerprints = new Array(length);
   const boundaries = new Array(length);
+  const silence = new Array(length);
 
   for (let i = 0; i < length; i += 1) {
     fingerprints[i] = adapter.fingerprint(i);
     boundaries[i] = adapter.boundary_id ? adapter.boundary_id(i) : null;
+    silence[i] = adapter.is_silent ? adapter.is_silent(i) : false;
   }
+  if (!opts.silence) opts.silence = silence;
 
   const candidates = [];
   candidates.push(...findSimpleRepeats(fingerprints, boundaries, opts));
@@ -90,6 +93,7 @@ function findSimpleRepeats(fps, boundaries, opts) {
   const total = fps.length;
   const maxLen = Math.min(opts.maxRepeatLen, total);
   const nextBoundary = buildNextBoundary(boundaries);
+  const silence = opts.silence || [];
 
   for (let start = 0; start < total; start += 1) {
     const boundaryIndex = nextBoundary[start + 1];
@@ -99,6 +103,7 @@ function findSimpleRepeats(fps, boundaries, opts) {
       const secondStart = start + len;
       if (secondStart + len - 1 > maxSpanEnd) break;
       if (!segmentsEqual(fps, start, secondStart, len)) continue;
+      if (!hasNonSilent(silence, start, start + len - 1)) continue;
 
       const maxCount = Math.floor((maxSpanEnd - start + 1) / len);
       let count = 2;
@@ -130,6 +135,7 @@ function findVoltas(fps, boundaries, opts) {
   const candidates = [];
   const total = fps.length;
   const maxPrefix = Math.min(opts.maxRepeatLen, total);
+  const silence = opts.silence || [];
 
   for (let start = 0; start < total; start += 1) {
     for (let prefixLen = opts.minPrefixLen; prefixLen <= maxPrefix; prefixLen += 1) {
@@ -146,6 +152,7 @@ function findVoltas(fps, boundaries, opts) {
 
           const repeatStart = start;
           const repeatEnd = end;
+          if (!hasNonSilent(silence, repeatStart, repeatEnd)) continue;
           const volta1Start = start + prefixLen;
           const volta1End = volta1Start + endLen1 - 1;
           const volta2Start = secondEnd;
@@ -301,6 +308,13 @@ function binarySearchPrev(ends, start) {
     }
   }
   return result;
+}
+
+function hasNonSilent(silence, start, end) {
+  for (let i = start; i <= end; i += 1) {
+    if (!silence[i]) return true;
+  }
+  return false;
 }
 
 function compareRepeat(a, b) {

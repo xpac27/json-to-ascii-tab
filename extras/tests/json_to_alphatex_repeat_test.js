@@ -16,6 +16,25 @@ function makeMeasure(fret) {
   };
 }
 
+function makeRestMeasure() {
+  return {
+    voices: [
+      {
+        beats: [
+          {
+            notes: [{ rest: true }],
+            type: 1,
+            rest: true,
+            duration: [1, 1],
+          },
+        ],
+        rest: true,
+      },
+    ],
+    rest: true,
+  };
+}
+
 function assertIncludes(output, needle) {
   assert(
     output.includes(needle),
@@ -115,6 +134,17 @@ function testMultiBarRestEnabled() {
   assertIncludes(output, '\\multiBarRest');
 }
 
+function testNoRepeatForSilentMeasures() {
+  const score = {
+    measures: Array.from({ length: 8 }, () => makeRestMeasure()),
+  };
+  const output = jsonToAlphaText(score);
+  const repeatStarts = output.split('\\ro').length - 1;
+  const repeatEnds = output.split('\\rc').length - 1;
+  assert.strictEqual(repeatStarts, 0);
+  assert.strictEqual(repeatEnds, 0);
+}
+
 function testDefaultMinRepeatLenBlocksShortNonSilent() {
   const score = {
     measures: [makeMeasure(1), makeMeasure(2), makeMeasure(1), makeMeasure(2)],
@@ -132,6 +162,7 @@ testMultiPassRepeat();
 testMultipleRepeats();
 testNoSingleMeasureRepeatForNonSilent();
 testMultiBarRestEnabled();
+testNoRepeatForSilentMeasures();
 testDefaultMinRepeatLenBlocksShortNonSilent();
 
 console.log('alphatex repeat inference tests: ok');

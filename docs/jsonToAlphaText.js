@@ -188,6 +188,7 @@ function inferRepeats(score, measureInfos, tempoMap, options) {
     len: () => measureInfos.length,
     fingerprint: (i) => fingerprints[i],
     boundary_id: (i) => boundaries[i],
+    is_silent: (i) => isSilentMeasure(measureInfos[i]),
     debug_label: (i) => `m${i + 1}`,
   };
 
@@ -210,6 +211,17 @@ function buildBoundaryIds(measureInfos, tempoMap) {
     }
   }
   return boundaries;
+}
+
+function isSilentMeasure(info) {
+  const voice0 = info.measure.voices?.[0];
+  if (info.measure.rest || voice0?.rest) return true;
+  if (!info.beats || info.beats.length === 0) return true;
+  return info.beats.every((beat) => {
+    if (beat.rest) return true;
+    if (!Array.isArray(beat.notes) || beat.notes.length === 0) return true;
+    return beat.notes.every((note) => note.rest);
+  });
 }
 
 function canonicalFingerprint(info) {
