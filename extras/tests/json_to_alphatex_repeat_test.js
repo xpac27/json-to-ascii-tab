@@ -128,6 +128,17 @@ function testLongRestRepeat() {
   assertMatches(output);
 }
 
+function testNoSingleMeasureRepeatForNonSilent() {
+  const score = {
+    measures: [makeMeasure(1), makeMeasure(1), makeMeasure(1)],
+  };
+  const output = jsonToAlphaText(score);
+  const repeatStarts = output.split('\\ro').length - 1;
+  const repeatEnds = output.split('\\rc').length - 1;
+  assert.strictEqual(repeatStarts, 0);
+  assert.strictEqual(repeatEnds, 0);
+}
+
 function testTempoSegmentedRestRepeats() {
   const measures = [
     ...Array.from({ length: 92 }, () => makeRestMeasure()),
@@ -161,6 +172,7 @@ testVoltaRepeat();
 testMultiPassRepeat();
 testMultipleRepeats();
 testLongRestRepeat();
+testNoSingleMeasureRepeatForNonSilent();
 testTempoSegmentedRestRepeats();
 
 console.log('alphatex repeat inference tests: ok');

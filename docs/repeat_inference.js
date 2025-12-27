@@ -4,6 +4,7 @@ const DEFAULT_OPTIONS = {
   minPrefixLen: 2,
   maxEndingLen: 8,
   allowMultipleRepeats: true,
+  allowSingleMeasureSilentRepeat: true,
   log: null,
 };
 
@@ -12,11 +13,14 @@ function inferFoldPlan(adapter, options = {}) {
   const length = adapter.len();
   const fingerprints = new Array(length);
   const boundaries = new Array(length);
+  const silence = new Array(length);
 
   for (let i = 0; i < length; i += 1) {
     fingerprints[i] = adapter.fingerprint(i);
     boundaries[i] = adapter.boundary_id ? adapter.boundary_id(i) : null;
+    silence[i] = adapter.is_silent ? adapter.is_silent(i) : false;
   }
+  if (!opts.silence) opts.silence = silence;
 
   const candidates = [];
   candidates.push(...findSimpleRepeats(fingerprints, boundaries, opts));
@@ -90,12 +94,16 @@ function findSimpleRepeats(fps, boundaries, opts) {
   const total = fps.length;
   const maxLen = Math.min(opts.maxRepeatLen, total);
   const nextBoundary = buildNextBoundary(boundaries);
+  const silence = opts.silence || [];
 
   for (let start = 0; start < total; start += 1) {
     const boundaryIndex = nextBoundary[start + 1];
     const maxSpanEnd = boundaryIndex !== null ? boundaryIndex - 1 : total - 1;
+    const minLen = (opts.allowSingleMeasureSilentRepeat && silence[start])
+      ? 1
+      : opts.minRepeatLen;
 
-    for (let len = opts.minRepeatLen; len <= maxLen; len += 1) {
+    for (let len = minLen; len <= maxLen; len += 1) {
       const secondStart = start + len;
       if (secondStart + len - 1 > maxSpanEnd) break;
       if (!segmentsEqual(fps, start, secondStart, len)) continue;
