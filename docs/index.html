@@ -271,13 +271,6 @@
       playerTime.hidden = true;
       printButton.hidden = true;
 
-      const jsonRetryState = {
-        parsed: null,
-        title: null,
-        triedRepeats: false,
-        retried: false,
-      };
-
       const api = new alphaTab.AlphaTabApi(alphaTabContainer, {
         player: {
           enablePlayer: true,
@@ -338,27 +331,7 @@
         }
       }
 
-      function loadJsonScore(parsed, title, inferRepeats) {
-        jsonRetryState.parsed = parsed;
-        jsonRetryState.title = title;
-        jsonRetryState.triedRepeats = inferRepeats;
-        const alphatex = window.jsonToAlphaText(parsed, { title, inferRepeats });
-        api.tex(alphatex);
-      }
-
-      function isAlphaTexParseError(err) {
-        const message = String(err?.message || err?.error?.message || '');
-        if (message.includes('AlphaTex')) return true;
-        const diagnostics = err?.diagnostics || err?.error?.diagnostics || err?.inner?.diagnostics;
-        return Array.isArray(diagnostics) && diagnostics.length > 0;
-      }
-
       api.error.on((err) => {
-        if (jsonRetryState.parsed && jsonRetryState.triedRepeats && !jsonRetryState.retried && isAlphaTexParseError(err)) {
-          jsonRetryState.retried = true;
-          loadJsonScore(jsonRetryState.parsed, jsonRetryState.title, false);
-          return;
-        }
         console.error(err);
         const details = describeLoadError(err);
         status.textContent = `Unable to read this file: ${details} Expected Guitar Pro, PowerTab, MusicXML, AlphaText, or score-JSON.`;
@@ -465,13 +438,9 @@
             if (isJson) {
               const parsed = JSON.parse(content);
               const title = titleFromFilename(fileName);
-              jsonRetryState.retried = false;
-              loadJsonScore(parsed, title, true);
+              const alphatex = window.jsonToAlphaText(parsed, { title, inferRepeats: true });
+              api.tex(alphatex);
             } else {
-              jsonRetryState.parsed = null;
-              jsonRetryState.title = null;
-              jsonRetryState.triedRepeats = false;
-              jsonRetryState.retried = false;
               api.tex(content);
             }
           } catch (error) {
