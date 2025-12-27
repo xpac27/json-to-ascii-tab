@@ -25,7 +25,8 @@ Example:
 - `\staff {tabs}` selects tab staff for stringed instruments.
 - `\tuning (E4 B3 G3 D3 A2 E2)` defines string tuning (note names with octave).
 - `\ts N D` sets time signature (e.g. `\ts 4 4`) and can be placed before the first beat of a bar.
-- `\ro` starts a repeat section (repeat open).
+- `\ro ()` starts a repeat section (repeat open). The empty argument list avoids ambiguity
+  when a bar begins with a chord `(` after the tag.
 - `\rc N` ends a repeat section and sets the repeat count (e.g. `\rc 2`).
 - `\ae (N ...)` marks the bar to be played on the listed repeat endings (alternate endings).
 

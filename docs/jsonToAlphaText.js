@@ -97,7 +97,7 @@ function jsonToAlphaText(raw, options = {}) {
 
     const meta = [];
     if (repeatMeta.repeatStarts.has(outputIndex)) {
-      meta.push('\\ro');
+      meta.push('\\ro ()');
     }
 
     const voltaPasses = repeatMeta.voltaStarts.get(outputIndex);
